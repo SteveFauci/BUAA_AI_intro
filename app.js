@@ -76,6 +76,7 @@ const els = {
   accuracyBars: document.querySelector("#accuracyBars"),
   studyAdvice: document.querySelector("#studyAdvice"),
   practicePanel: document.querySelector("#practicePanel"),
+  practiceSheetToggle: document.querySelector("#practiceSheetToggle"),
   practiceSheetCount: document.querySelector("#practiceSheetCount"),
   practiceSheetGrid: document.querySelector("#practiceSheetGrid"),
   practiceSheetProgress: document.querySelector("#practiceSheetProgress"),
@@ -114,6 +115,8 @@ let activeSpecialty = null;
 let selectedGraphNode = null;
 let game2048 = null;
 let gameMoveAnimations = new Map();
+let practiceSheetExpanded = false;
+let touchStart = null;
 
 const EXAM_SIZE = 60;
 const EXAM_DURATION_MS = 30 * 60 * 1000;
@@ -367,7 +370,7 @@ function isRelaxMode() {
 }
 
 function isPracticeMode() {
-  return mode === "single";
+  return mode === "single" || mode === "multiple" || mode === "wrong" || mode === "special";
 }
 
 function currentIndex() {
@@ -505,6 +508,8 @@ function render() {
   els.examPanel.classList.add("hidden");
   els.studyPanel.classList.add("hidden");
   els.practicePanel.classList.remove("hidden");
+  els.practicePanel.classList.toggle("sheet-expanded", practiceSheetExpanded);
+  els.practiceSheetToggle?.setAttribute("aria-expanded", String(practiceSheetExpanded));
   els.card.classList.remove("hidden");
   els.practiceNav.classList.remove("hidden");
   updateStudyTimer();
@@ -580,6 +585,7 @@ function renderPracticeSheet(list, index) {
   const answeredMap = answeredQuestionMap();
   const completed = list.filter((question) => answeredMap.has(question.id)).length;
   els.practiceSheetCount.textContent = `${list.length} 题`;
+  els.practiceSheetToggle?.setAttribute("aria-expanded", String(practiceSheetExpanded));
   els.practiceSheetProgress.textContent = `已完成 ${completed} / ${list.length}`;
   els.practiceSheetGrid.innerHTML = list
     .map((question, itemIndex) => {
@@ -594,6 +600,7 @@ function renderPracticeSheet(list, index) {
   for (const button of els.practiceSheetGrid.querySelectorAll(".practice-cell")) {
     button.addEventListener("click", () => {
       setCurrentIndex(Number(button.dataset.index));
+      practiceSheetExpanded = false;
       render();
     });
   }
@@ -1128,6 +1135,53 @@ function moveExam(delta) {
   saveState();
   renderExamQuestion();
   renderAnswerSheet();
+}
+
+function isCoarsePointer() {
+  return window.matchMedia?.("(pointer: coarse)").matches ?? false;
+}
+
+function beginTouch(event, area) {
+  if (!isCoarsePointer() || event.touches.length !== 1) return;
+  const touch = event.touches[0];
+  touchStart = {
+    area,
+    x: touch.clientX,
+    y: touch.clientY,
+  };
+}
+
+function endTouch(event) {
+  if (!touchStart || !isCoarsePointer()) {
+    touchStart = null;
+    return;
+  }
+
+  const touch = event.changedTouches[0];
+  const dx = touch.clientX - touchStart.x;
+  const dy = touch.clientY - touchStart.y;
+  const absX = Math.abs(dx);
+  const absY = Math.abs(dy);
+  const area = touchStart.area;
+  touchStart = null;
+
+  if (Math.max(absX, absY) < 42) return;
+
+  if (area === "game") {
+    if (absX > absY) moveGame(dx > 0 ? "right" : "left");
+    else moveGame(dy > 0 ? "down" : "up");
+    event.preventDefault();
+    return;
+  }
+
+  if (absX < 64 || absX < absY * 1.35) return;
+  if (area === "practice" && isPracticeMode()) {
+    move(dx > 0 ? -1 : 1);
+    event.preventDefault();
+  } else if (area === "exam" && mode === "exam" && examViewActive) {
+    moveExam(dx > 0 ? -1 : 1);
+    event.preventDefault();
+  }
 }
 
 function remainingExamMs() {
@@ -2037,8 +2091,22 @@ for (const button of [...els.railActions, ...els.bottomTabs]) {
 }
 els.prevBtn.addEventListener("click", () => move(-1));
 els.nextBtn.addEventListener("click", () => move(1));
+els.practiceSheetToggle?.addEventListener("click", () => {
+  practiceSheetExpanded = !practiceSheetExpanded;
+  els.practicePanel.classList.toggle("sheet-expanded", practiceSheetExpanded);
+  els.practiceSheetToggle.setAttribute("aria-expanded", String(practiceSheetExpanded));
+});
+els.card.addEventListener("touchstart", (event) => beginTouch(event, "practice"), { passive: true });
+els.card.addEventListener("touchend", endTouch, { passive: false });
 els.examPrevBtn.addEventListener("click", () => moveExam(-1));
 els.examNextBtn.addEventListener("click", () => moveExam(1));
+els.examQuestionNo.closest(".exam-question").addEventListener("touchstart", (event) => beginTouch(event, "exam"), { passive: true });
+els.examQuestionNo.closest(".exam-question").addEventListener("touchend", endTouch, { passive: false });
+els.gameBoard.addEventListener("touchstart", (event) => beginTouch(event, "game"), { passive: true });
+els.gameBoard.addEventListener("touchmove", (event) => {
+  if (touchStart?.area === "game") event.preventDefault();
+}, { passive: false });
+els.gameBoard.addEventListener("touchend", endTouch, { passive: false });
 els.gameRestartBtn.addEventListener("click", restartGame);
 els.gameHomeBtn.addEventListener("click", () => switchMode("home"));
 els.gameAgainBtn.addEventListener("click", restartGameDirect);

@@ -3,6 +3,8 @@
 [![BUAA](https://img.shields.io/badge/BUAA-人工智能导论-orange.svg)](#)
 [![作业设计](https://img.shields.io/badge/作业设计-AI%2BX创意-blue.svg)](#)
 
+[👉🔗点此处在线体验](https://stevefauci.github.io/BUAA_AI_intro/)
+
 这是一个给北航《人工智能导论》期末复习用的小工具。题目原来来自课程资料里的 PDF，我整理成了 `questions.json`，再做成网页，方便平时背题、练习多选、模拟考试、看错题和简单分析复习情况。
 
 ## 运行

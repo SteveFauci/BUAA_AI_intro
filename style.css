@@ -500,6 +500,28 @@ h1 {
   margin-bottom: 16px;
 }
 
+.practice-sheet-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-height: 42px;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  padding: 0;
+  text-align: left;
+}
+
+.practice-sheet-toggle::after {
+  content: "收起";
+  flex: 0 0 auto;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
 .practice-sheet-head strong {
   font-size: 18px;
 }
@@ -1632,7 +1654,7 @@ input {
 
 @media (max-width: 640px) {
   body {
-    padding-bottom: 82px;
+    padding-bottom: calc(88px + env(safe-area-inset-bottom));
   }
 
   .app-rail {
@@ -1642,7 +1664,26 @@ input {
   .app {
     width: min(100% - 16px, 900px);
     margin: 0 auto;
-    padding-top: 18px;
+    padding-top: 86px;
+    padding-bottom: 164px;
+  }
+
+  .progress-wrap {
+    position: fixed;
+    inset: calc(8px + env(safe-area-inset-top)) 10px auto 10px;
+    z-index: 28;
+    margin-bottom: 0;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--panel) 96%, transparent);
+    box-shadow: var(--shadow);
+    padding: 10px;
+    backdrop-filter: blur(14px);
+  }
+
+  .progress-meta {
+    margin-bottom: 6px;
+    font-size: 13px;
   }
 
   .topbar {
@@ -1707,6 +1748,7 @@ input {
 
   .game-board {
     --game-gap: 8px;
+    touch-action: none;
   }
 
   .home-hero {
@@ -1724,6 +1766,7 @@ input {
   .question-card {
     padding: 18px;
     min-height: 520px;
+    touch-action: pan-y;
   }
 
   .study-timer {
@@ -1747,11 +1790,41 @@ input {
   .practice-sheet {
     border-right: 0;
     border-bottom: 1px solid var(--line);
+    padding: 12px 14px;
+  }
+
+  .practice-sheet-head {
+    margin-bottom: 0;
+  }
+
+  .practice-sheet-toggle::after {
+    content: "展开";
+  }
+
+  .practice-panel.sheet-expanded .practice-sheet-head {
+    margin-bottom: 14px;
+  }
+
+  .practice-panel.sheet-expanded .practice-sheet-toggle::after {
+    content: "收起";
   }
 
   .practice-sheet-grid {
     grid-template-columns: repeat(7, 1fr);
     max-height: 320px;
+  }
+
+  .practice-sheet-grid,
+  .practice-sheet-progress {
+    display: none;
+  }
+
+  .practice-panel.sheet-expanded .practice-sheet-grid {
+    display: grid;
+  }
+
+  .practice-panel.sheet-expanded .practice-sheet-progress {
+    display: block;
   }
 
   .study-panel,
@@ -1807,19 +1880,25 @@ input {
   }
 
   .nav-actions {
-    grid-template-columns: 1fr;
+    position: fixed;
+    inset: auto 10px calc(78px + env(safe-area-inset-bottom)) 10px;
+    z-index: 29;
+    grid-template-columns: 1fr 1.1fr 1fr;
+    margin-top: 0;
+    box-shadow: var(--shadow);
   }
 
   .bottom-tabs {
     position: fixed;
-    inset: auto 10px 10px;
+    inset: auto 10px calc(10px + env(safe-area-inset-bottom)) 10px;
     z-index: 30;
     display: grid;
     grid-template-columns: repeat(6, 1fr);
     gap: 4px;
     border: 1px solid var(--line);
     border-radius: 8px;
-    background: color-mix(in srgb, var(--panel) 92%, transparent);
+    background: color-mix(in srgb, var(--panel) 96%, transparent);
+    color: var(--text);
     box-shadow: var(--shadow);
     padding: 6px;
     backdrop-filter: blur(14px);
@@ -1839,11 +1918,38 @@ input {
 
   .bottom-tab span {
     font-size: 18px;
+    color: currentColor;
   }
 
   .bottom-tab.active {
-    color: var(--brand);
     background: var(--brand-soft);
+    color: var(--brand-soft-text);
+    font-weight: 800;
+  }
+
+  .bottom-tab:not(.active) {
+    color: var(--text);
+  }
+
+  .exam-panel:has(.exam-question:not(.hidden)) {
+    padding-bottom: 82px;
+  }
+
+  .exam-question {
+    touch-action: pan-y;
+  }
+
+  .exam-nav {
+    position: fixed;
+    inset: auto 10px calc(78px + env(safe-area-inset-bottom)) 10px;
+    z-index: 29;
+    margin-top: 0;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--panel) 96%, transparent);
+    box-shadow: var(--shadow);
+    padding: 10px;
+    backdrop-filter: blur(14px);
   }
 
   .bar-row {
@@ -1854,22 +1960,31 @@ input {
 
 @media (max-width: 420px) {
   body {
-    padding-bottom: 70px;
+    padding-bottom: calc(74px + env(safe-area-inset-bottom));
   }
 
   .bottom-tabs {
-    inset: auto 8px 8px;
+    inset: auto 8px calc(8px + env(safe-area-inset-bottom)) 8px;
     gap: 2px;
     padding: 5px;
   }
 
   .bottom-tab {
     min-height: 44px;
-    font-size: 0;
+    font-size: 10px;
   }
 
   .bottom-tab span {
     font-size: 20px;
+  }
+
+  .nav-actions,
+  .exam-nav {
+    inset-right: 8px;
+    inset-left: 8px;
+    bottom: calc(62px + env(safe-area-inset-bottom));
+    gap: 6px;
+    padding: 8px;
   }
 
   .game-stats {
