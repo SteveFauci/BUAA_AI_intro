@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>BUAA AI StudyMap</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <aside class="app-rail" aria-label="主导航">
+    <div class="rail-brand">
+      <div class="brand-mark">AI</div>
+      <div class="brand-copy">
+        <strong>AI StudyMap</strong>
+        <span>人工智能导论</span>
+      </div>
+    </div>
+
+    <div class="rail-section">
+      <span class="rail-label">导航</span>
+      <button class="rail-action active" type="button" data-mode="home">
+        <span class="rail-icon">⌂</span>
+        <span>开始练习</span>
+      </button>
+      <button class="rail-action" type="button" data-mode="single">
+        <span class="rail-icon">✎</span>
+        <span>背题模式</span>
+      </button>
+      <button class="rail-action" type="button" data-mode="exam">
+        <span class="rail-icon">◷</span>
+        <span>模拟考试</span>
+      </button>
+      <button class="rail-action" type="button" data-mode="graph">
+        <span class="rail-icon">◎</span>
+        <span>我的知识图谱</span>
+      </button>
+      <button class="rail-action" type="button" data-mode="analytics">
+        <span class="rail-icon">▥</span>
+        <span>学习分析</span>
+      </button>
+      <button class="rail-action" type="button" data-mode="relax">
+        <span class="rail-icon">▦</span>
+        <span>放松一下</span>
+      </button>
+    </div>
+
+    <div class="rail-footer">
+      <span class="avatar">SF</span>
+      <div>
+        <strong>Steve Fauci</strong>
+        <a href="https://github.com/SteveFauci" target="_blank" rel="noreferrer">GitHub</a>
+      </div>
+    </div>
+  </aside>
+
+  <main class="app">
+    <header class="topbar">
+      <button id="backHomeBtn" class="back-button hidden" type="button">返回首页</button>
+      <div>
+        <h1>BUAA AI StudyMap</h1>
+        <p id="subtitle">北航人工智能导论复习系统</p>
+      </div>
+      <div class="topbar-actions">
+        <div class="stats" aria-label="刷题统计">
+          <span><strong id="totalCount">0</strong>题</span>
+          <span><strong id="wrongCount">0</strong>错题</span>
+          <span><strong id="logCount">0</strong>记录</span>
+        </div>
+        <div class="app-menu-wrap">
+          <button id="appMenuBtn" class="icon-button" type="button" aria-haspopup="true" aria-expanded="false" aria-label="打开设置菜单">☰</button>
+          <div id="appMenu" class="app-menu hidden" role="menu">
+            <section class="menu-section">
+              <strong>设置</strong>
+              <div class="theme-options" role="group" aria-label="主题设置">
+                <button class="theme-choice" type="button" data-theme-choice="system">跟随系统</button>
+                <button class="theme-choice" type="button" data-theme-choice="light">浅色</button>
+                <button class="theme-choice" type="button" data-theme-choice="dark">深色</button>
+              </div>
+            </section>
+            <section class="menu-section">
+              <button id="clearStudyDataBtn" class="menu-danger" type="button">清除做题记录</button>
+              <button id="showStudyTimerBtn" type="button">显示学习计时器</button>
+            </section>
+            <section class="menu-section">
+              <strong>项目链接</strong>
+              <a href="https://github.com/SteveFauci" target="_blank" rel="noreferrer">github.com/SteveFauci</a>
+              <p>项目仓库暂未公开，后续可放在这里。</p>
+            </section>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <section class="toolbar hidden" aria-label="刷题模式">
+      <button id="homeMode" class="mode-button active" type="button">首页</button>
+      <button id="normalMode" class="mode-button" type="button">单选/判断</button>
+      <button id="multipleMode" class="mode-button" type="button">多选训练</button>
+      <button id="wrongMode" class="mode-button" type="button">错题复习</button>
+      <button id="examMode" class="mode-button" type="button">模拟考试</button>
+      <button id="graphMode" class="mode-button" type="button">我的知识图谱</button>
+      <button id="analyticsMode" class="mode-button" type="button">学习分析</button>
+      <button id="relaxMode" class="mode-button" type="button">放松一下</button>
+      <button id="resetWrong" class="ghost-button" type="button">清空错题</button>
+    </section>
+
+    <section class="progress-wrap" aria-label="进度">
+      <div class="progress-meta">
+        <span id="modeLabel">顺序刷题</span>
+        <span id="progressText">0 / 0</span>
+      </div>
+      <div class="progress">
+        <div id="progressBar"></div>
+      </div>
+    </section>
+
+    <section id="emptyState" class="empty hidden">
+      <h2>当前没有错题</h2>
+      <p>回到顺序刷题，答错的题会自动进入这里。</p>
+    </section>
+
+    <section id="homePanel" class="home-panel">
+      <div class="home-hero">
+        <div>
+          <span class="badge">AI+北航学习生活</span>
+          <h2>把期末题库变成可诊断的复习地图</h2>
+          <p>从背题、模拟考试到动态知识图谱，系统会根据答题记录更新掌握度，帮助定位薄弱模块。</p>
+        </div>
+        <div class="hero-meter">
+          <strong id="homeMastery">0%</strong>
+          <span>总体掌握度</span>
+        </div>
+      </div>
+
+      <div class="feature-grid">
+        <button class="feature-card" type="button" data-mode="single">
+          <strong>背题模式</strong>
+          <span>顺序练习单选和判断题，答错自动进入错题本。</span>
+        </button>
+        <button class="feature-card" type="button" data-mode="multiple">
+          <strong>多选训练</strong>
+          <span>单独训练多选题，提交后检查漏选、多选和错选。</span>
+        </button>
+        <button class="feature-card" type="button" data-mode="exam">
+          <strong>模拟考试</strong>
+          <span>随机 60 题，限时 30 分钟，左侧答题卡记录作答状态。</span>
+        </button>
+        <button class="feature-card" type="button" data-mode="graph">
+          <strong>我的知识图谱</strong>
+          <span>查看课程模块、知识子类、题目节点和动态掌握度。</span>
+        </button>
+        <button class="feature-card" type="button" data-mode="wrong">
+          <strong>错题复习</strong>
+          <span>集中处理考试和练习中的错题，答对后移出错题本。</span>
+        </button>
+        <button class="feature-card" type="button" data-mode="analytics">
+          <strong>学习分析</strong>
+          <span>按知识模块统计正确率，生成薄弱点复习建议。</span>
+        </button>
+        <button class="feature-card" type="button" data-mode="relax">
+          <strong>放松一下</strong>
+          <span>嵌入 2048 小游戏，达到 I❤️BUAA 有彩蛋。</span>
+        </button>
+      </div>
+    </section>
+
+    <section id="relaxPanel" class="relax-panel hidden">
+      <div class="relax-head">
+        <div>
+          <span class="badge">放松一下</span>
+          <h2>2048 · I❤️BUAA</h2>
+          <p>达到 2048 有彩蛋。方向键滑动，按 Z 撤销，按 Delete 进入删除模式后单击方块摧毁。</p>
+        </div>
+        <div class="game-stats">
+          <article><strong id="gameScore">0</strong><span>总分</span></article>
+          <article><strong id="gameDeleteLeft">10</strong><span>删除机会</span></article>
+        </div>
+      </div>
+      <div class="game-layout">
+        <section class="game-board-wrap">
+          <div id="gameBoard" class="game-board" aria-label="2048 游戏棋盘"></div>
+          <div id="gameMessage" class="game-message hidden"></div>
+          <div id="gameOverActions" class="game-over-actions hidden">
+            <button id="gameHomeBtn" type="button">返回首页</button>
+            <button id="gameAgainBtn" class="primary" type="button">再来一次</button>
+          </div>
+        </section>
+        <aside class="game-side">
+          <div class="game-actions">
+            <button id="gameRestartBtn" class="primary" type="button">重新开始</button>
+            <button id="gameUndoBtn" type="button">撤销 Z</button>
+            <button id="gameDeleteBtn" type="button">删除方块</button>
+            <button id="gameEasyBtn" type="button">请求支援</button>
+          </div>
+          <div class="game-help">
+            <strong>规则</strong>
+            <p>相同数字合并得分。2048 方块会显示为 I❤️BUAA。</p>
+            <p>删除模式下点一个非空方块，会先确认再摧毁；最多 10 次。</p>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="examPanel" class="exam-panel hidden">
+      <section id="examIntro" class="exam-intro">
+        <div class="exam-intro-main">
+          <span class="badge">模拟考试</span>
+          <h2>确认后开始计时</h2>
+          <p>系统将随机抽取 60 题，考试时间 30 分钟。进入答题界面后才开始倒计时，交卷后会保存成绩并更新历史记录和进步曲线。</p>
+          <div class="exam-rule-grid">
+            <article><strong>60</strong><span>随机题目</span></article>
+            <article><strong>30</strong><span>分钟限时</span></article>
+            <article><strong id="examHistoryCount">0</strong><span>历史考试</span></article>
+          </div>
+          <div class="exam-start-actions">
+            <button id="startExamBtn" class="primary" type="button">开始考试</button>
+            <button id="resumeExamBtn" type="button">继续未完成考试</button>
+          </div>
+        </div>
+        <div class="exam-history-card">
+          <div class="graph-side-head">
+            <h3>成绩进步曲线</h3>
+            <span id="examBestScore" class="type">暂无记录</span>
+          </div>
+          <div id="scoreTrend" class="score-trend" aria-label="模拟考试分数进步曲线"></div>
+          <div id="examHistoryList" class="exam-history-list"></div>
+        </div>
+      </section>
+      <aside id="examAnswerSheet" class="answer-sheet">
+        <div class="exam-meta">
+          <strong id="examTimer">30:00</strong>
+          <span id="examAnswered">0 / 60 已答</span>
+        </div>
+        <div id="answerSheetGrid" class="answer-sheet-grid" aria-label="答题卡"></div>
+        <button id="newExamBtn" type="button">重新抽题</button>
+        <button id="submitExamBtn" class="primary" type="button">交卷</button>
+      </aside>
+      <section class="exam-question">
+        <div class="question-head">
+          <span id="examQuestionNo" class="badge">第 1 题</span>
+          <span id="examQuestionType" class="type">单选</span>
+          <span id="examQuestionModule" class="type">未分类</span>
+        </div>
+        <h2 id="examStem"></h2>
+        <div id="examOptions" class="options"></div>
+        <div id="examResult" class="answer-panel hidden"></div>
+        <nav class="exam-nav">
+          <button id="examPrevBtn" type="button">上一题</button>
+          <button id="examNextBtn" class="primary" type="button">下一题</button>
+        </nav>
+      </section>
+    </section>
+
+    <section id="studyPanel" class="study-panel hidden">
+      <div class="panel-head">
+        <div>
+          <h2 id="panelTitle">知识图谱</h2>
+          <p id="panelSubtitle">从期末题库中自动抽取课程模块和知识点关系</p>
+        </div>
+      </div>
+
+      <div id="graphView" class="panel-view">
+        <div id="moduleSummary" class="module-summary"></div>
+        <div class="graph-layout">
+          <div class="graph-card">
+            <div id="knowledgeGraph" class="knowledge-graph" aria-label="知识图谱"></div>
+          </div>
+          <div class="graph-card">
+            <div class="graph-side-head">
+              <h3>节点题目</h3>
+              <button id="specialTrainingBtn" class="primary" type="button">专项训练</button>
+            </div>
+            <div class="search-row">
+              <input id="graphSearch" type="search" placeholder="输入知识点或题干关键词">
+              <button id="graphSearchBtn" type="button">题目检索</button>
+            </div>
+            <div id="graphResult" class="graph-result"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="analyticsView" class="panel-view hidden">
+        <div id="analysisCards" class="analysis-cards"></div>
+        <div id="examAnalytics" class="exam-analytics"></div>
+        <div class="graph-layout">
+          <div class="graph-card">
+            <h3>模块正确率</h3>
+            <div id="accuracyBars" class="bars"></div>
+          </div>
+          <div class="graph-card">
+            <h3>AI 复习建议</h3>
+            <div id="studyAdvice" class="advice"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="practicePanel" class="practice-panel hidden">
+      <aside class="practice-sheet">
+        <div class="practice-sheet-head">
+          <strong>题目列表</strong>
+          <span id="practiceSheetCount">0 题</span>
+        </div>
+        <div id="practiceSheetGrid" class="practice-sheet-grid" aria-label="题目列表"></div>
+        <div id="practiceSheetProgress" class="practice-sheet-progress">已完成 0 / 0</div>
+      </aside>
+
+      <section id="card" class="question-card">
+        <div id="studyTimer" class="study-timer" aria-label="学习计时器">
+          <div>
+            <span>学习时间</span>
+            <strong id="studyTimerText">00:00:00</strong>
+          </div>
+          <div class="study-timer-actions">
+            <button id="studyTimerToggle" type="button">暂停</button>
+            <button id="studyTimerReset" type="button">重置</button>
+            <button id="studyTimerClose" type="button" aria-label="关闭学习计时器">关闭</button>
+          </div>
+        </div>
+        <div class="question-head">
+          <span id="questionNo" class="badge">第 0 题</span>
+          <span id="questionType" class="type">单选</span>
+          <span id="questionModule" class="type">未分类</span>
+        </div>
+        <h2 id="stem"></h2>
+        <div id="options" class="options"></div>
+        <div id="answerPanel" class="answer-panel hidden">
+          <div id="resultLine" class="result-line"></div>
+          <div id="correctLine" class="correct-line"></div>
+        </div>
+      </section>
+    </section>
+
+    <nav id="practiceNav" class="nav-actions" aria-label="题目导航">
+      <button id="prevBtn" type="button">上一题</button>
+      <button id="showAnswerBtn" type="button">直接看答案</button>
+      <button id="nextBtn" class="primary" type="button">下一题</button>
+    </nav>
+  </main>
+
+  <nav class="bottom-tabs" aria-label="移动端导航">
+    <button class="bottom-tab active" type="button" data-mode="home"><span>⌂</span>首页</button>
+    <button class="bottom-tab" type="button" data-mode="single"><span>✎</span>练习</button>
+    <button class="bottom-tab" type="button" data-mode="exam"><span>◷</span>考试</button>
+    <button class="bottom-tab" type="button" data-mode="graph"><span>◎</span>图谱</button>
+    <button class="bottom-tab" type="button" data-mode="analytics"><span>▥</span>我的</button>
+    <button class="bottom-tab" type="button" data-mode="relax"><span>▦</span>放松</button>
+  </nav>
+
+  <script src="./app.js"></script>
+</body>
+</html>
